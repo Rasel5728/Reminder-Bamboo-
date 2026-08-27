@@ -50,7 +50,41 @@ class _AddTaskPageState extends State<AddTaskPage> {
   }
 
   //Save Task
-  
+  void saveTask() {
+    //check fill TextField
+    if (titleController.text.isEmpty) {
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text("Bainchod Title de")));
+      return;
+    }
+
+    if (selectedDate == null || SelectedTime == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text("Bainchod Date and Time de")),
+      );
+      return;
+    }
+
+    //togather date and time
+    final DateTime finalDateTime = DateTime(
+      selectedDate!.year,
+      selectedDate!.month,
+      selectedDate!.day,
+      selectedDate!.hour,
+      selectedDate!.minute,
+    );
+
+    //New Task Object
+    final Task newTask = Task(
+      title: titleController.text,
+      description: descriptionController.text,
+      dateTime: finalDateTime,
+      isHighPriority: isHighPriority,
+    );
+
+    
+  }
 
   @override
   Widget build(BuildContext context) {
