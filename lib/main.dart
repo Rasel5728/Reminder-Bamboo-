@@ -1,3 +1,4 @@
+import 'package:bamboo/home_page.dart';
 import 'package:flutter/material.dart';
 import 'add_task_page.dart';
 
@@ -13,7 +14,7 @@ class MyApp extends StatelessWidget {
       theme: ThemeData.light(),       //Light mode
       darkTheme: ThemeData.dark(),    // Dark mode
       themeMode: ThemeMode.system,    //System mode check dark or light
-      home: const AddTaskPage(),
+      home: const HomePage(),
     );
   }
 }
