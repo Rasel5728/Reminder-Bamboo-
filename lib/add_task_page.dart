@@ -55,13 +55,13 @@ class _AddTaskPageState extends State<AddTaskPage> {
     if (titleController.text.isEmpty) {
       ScaffoldMessenger.of(
         context,
-      ).showSnackBar(const SnackBar(content: Text("Bainchod Title de")));
+      ).showSnackBar(const SnackBar(content: Text("Set Titile")));
       return;
     }
 
     if (selectedDate == null || SelectedTime == null) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text("Set Time and Date")),
+        const SnackBar(content: Text("Set Date and Time")),
       );
       return;
     }

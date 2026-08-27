@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:hive_flutter/hive_flutter.dart';
 import 'task_model.dart';
 import 'add_task_page.dart';
 
@@ -10,114 +11,110 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
-  //State
-  //Hive add next time
-  final List<Task> tasks = [];
+  //  HIVE BOX 
 
-  //Navigation
+  final Box<Task> taskBox = Hive.box<Task>('tasksBox');
+
+  //  NAVIGATION 
   Future<void> goToAddTaskPage() async {
     final Task? newTask = await Navigator.push(
       context,
       MaterialPageRoute(builder: (context) => const AddTaskPage()),
     );
 
-    //Click Back buttom,result: newtask null
     if (newTask != null) {
       setState(() {
-        tasks.add(newTask);
+        taskBox.add(newTask);
       });
     }
   }
 
-  //Delete Task
+  //  DELETE TASK 
   void deleteTask(int index) {
     setState(() {
-      tasks.removeAt(index);
+      taskBox.deleteAt(index);
     });
   }
 
-  //Toggle Done
-  void toggleDone(int index) {
+  //  TOGGLE DONE 
+  void toggleDone(Task task) {
     setState(() {
-      tasks[index].isDone = !tasks[index].isDone;
+      task.isDone = !task.isDone;
+      task.save(); 
     });
   }
 
-  //UI design
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text("TASKS")),
-      body: tasks.isEmpty
-          ? const Center(
+      appBar: AppBar(title: const Text("Tasks")),
+
+      body: ValueListenableBuilder(
+        valueListenable: taskBox.listenable(),
+        builder: (context, Box<Task> box, _) {
+          if (box.isEmpty) {
+            return const Center(
               child: Text(
-                "No Task Add,Click \n+ Button To Add New Task",
+                "Click\n+ Button To Add New Task",
                 textAlign: TextAlign.center,
                 style: TextStyle(fontSize: 16, color: Colors.grey),
               ),
-            )
-          : ListView.builder(
-              padding: const EdgeInsets.all(12),
-              itemCount: tasks.length,
-              itemBuilder: (context, index) {
-                final task = tasks[index];
+            );
+          }
 
-                return Card(
-                  margin: const EdgeInsets.symmetric(vertical: 6),
-                  child: ListTile(
-                    //checkbox
-                    leading: Checkbox(
-                      value: task.isDone,
-                     onChanged: (value)=>toggleDone(index),
-                     ),
+          return ListView.builder(
+            padding: const EdgeInsets.all(12),
+            itemCount: box.length,
+            itemBuilder: (context, index) {
+              final task = box.getAt(index)!;
 
-                     //Title
-                     title: Text(
-                      task.title,
-                      style: TextStyle(
-                        //strikethough
-                        decoration: task.isDone?TextDecoration.lineThrough:TextDecoration.none,
-                        fontWeight: FontWeight.bold,
-                      ),
-                     ),
-
-                     //SubTitle
-                     subtitle: Text(
-                      "${task.description}\n"
-                      "${task.dateTime.day}/${task.dateTime.month}/${task.dateTime.year} "
-                      "${TimeOfDay.fromDateTime(task.dateTime).format(context)}",
-                     ),
-                     isThreeLine: true,
-
-                     //Priority Idicator and Delete Button
-
-                     trailing: Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        //High Priority indicate red dot
-                        if(task.isHighPriority)
+              return Card(
+                margin: const EdgeInsets.symmetric(vertical: 6),
+                child: ListTile(
+                  leading: Checkbox(
+                    value: task.isDone,
+                    onChanged: (value) => toggleDone(task),
+                  ),
+                  title: Text(
+                    task.title,
+                    style: TextStyle(
+                      decoration: task.isDone
+                          ? TextDecoration.lineThrough
+                          : TextDecoration.none,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  subtitle: Text(
+                    "${task.description}\n"
+                    "${task.dateTime.day}/${task.dateTime.month}/${task.dateTime.year} "
+                    "${TimeOfDay.fromDateTime(task.dateTime).format(context)}",
+                  ),
+                  isThreeLine: true,
+                  trailing: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      if (task.isHighPriority)
                         const Padding(
                           padding: EdgeInsets.only(right: 8),
-                          child: Icon(Icons.priority_high,color: Colors.red,),
+                          child: Icon(Icons.priority_high, color: Colors.red),
                         ),
-                        IconButton(
-                          onPressed: ()=> deleteTask(index), 
-                          icon: Icon(Icons.delete_outline),
-                          ),
-                      ],
-                     ),
-
-
+                      IconButton(
+                        icon: const Icon(Icons.delete_outline),
+                        onPressed: () => deleteTask(index),
+                      ),
+                    ],
                   ),
-                );
-              },
-            ),
+                ),
+              );
+            },
+          );
+        },
+      ),
 
-            //Add Button
-            floatingActionButton: FloatingActionButton(onPressed: goToAddTaskPage,
-            child: const Icon(Icons.add),
-            
-            ),
+      floatingActionButton: FloatingActionButton(
+        onPressed: goToAddTaskPage,
+        child: const Icon(Icons.add),
+      ),
     );
   }
 }
