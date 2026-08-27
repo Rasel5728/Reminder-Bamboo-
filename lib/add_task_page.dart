@@ -61,7 +61,7 @@ class _AddTaskPageState extends State<AddTaskPage> {
 
     if (selectedDate == null || SelectedTime == null) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text("Bainchod Date and Time de")),
+        const SnackBar(content: Text("Set Time and Date")),
       );
       return;
     }
@@ -71,8 +71,8 @@ class _AddTaskPageState extends State<AddTaskPage> {
       selectedDate!.year,
       selectedDate!.month,
       selectedDate!.day,
-      selectedDate!.hour,
-      selectedDate!.minute,
+      SelectedTime!.hour,
+      SelectedTime!.minute,
     );
 
     //New Task Object
@@ -83,11 +83,95 @@ class _AddTaskPageState extends State<AddTaskPage> {
       isHighPriority: isHighPriority,
     );
 
-    
+    //Hive code part
+    Navigator.pop(context, newTask);
   }
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold();
+    return Scaffold(
+      appBar: AppBar(title: Text("Add Task")),
+      body: SingleChildScrollView(
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            //Title Field
+            TextField(
+              controller: titleController,
+              decoration: const InputDecoration(
+                labelText: "Title",
+                border: OutlineInputBorder(),
+              ),
+            ),
+
+            const SizedBox(height: 16),
+
+            //Description Field
+            TextField(
+              controller: descriptionController,
+              maxLines: 3, //Maximum 3 line write
+              decoration: const InputDecoration(
+                labelText: "Description",
+                border: OutlineInputBorder(),
+              ),
+            ),
+
+            const SizedBox(height: 16),
+
+            //Date Picker Button
+            ListTile(
+              contentPadding: EdgeInsets.zero,
+              leading: const Icon(Icons.calendar_today),
+              title: Text(
+                selectedDate==null? "Set Date" : "${selectedDate!.day}/${selectedDate!.month}/${selectedDate!.year}",
+              ),
+              onTap: pickDate,            
+            ),
+
+            const SizedBox(height: 16),
+
+            //Time picker Button
+            ListTile(
+              contentPadding: EdgeInsets.zero,
+              leading: const Icon(Icons.access_time),
+              title: Text(
+                SelectedTime == null
+                    ? "Set Time"
+                    : SelectedTime!.format(context),
+              ),
+              onTap: pickTime,
+            ),
+
+            const SizedBox(height: 16),
+
+            //Priority Toggle
+            SwitchListTile(
+              contentPadding: EdgeInsets.zero,
+              title: const Text("High Priority"),
+              value: isHighPriority,
+              onChanged: (value) {
+                setState(() {
+                  isHighPriority = value;
+                });
+              },
+            ),
+
+            const SizedBox(height: 16),
+
+            SizedBox(
+              width: double.infinity,
+              child: ElevatedButton(
+                onPressed: saveTask,
+                child: const Padding(
+                  padding: EdgeInsets.symmetric(vertical: 12),
+                  child: Text("Save Task"),
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
   }
 }
