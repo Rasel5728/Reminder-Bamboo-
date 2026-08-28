@@ -4,7 +4,6 @@ import 'package:timezone/data/latest.dart' as tz_data;
 import 'package:permission_handler/permission_handler.dart';
 
 class NotificationService {
-  // Singleton pattern
   static final NotificationService _instance = NotificationService._internal();
   factory NotificationService() => _instance;
   NotificationService._internal();
@@ -12,17 +11,13 @@ class NotificationService {
   final FlutterLocalNotificationsPlugin _notificationsPlugin =
       FlutterLocalNotificationsPlugin();
 
-  //  INITIALIZE
-
+  // ================= INITIALIZE =================
   Future<void> init() async {
-    tz_data.initializeTimeZones(); // timezone
-
-    // time zone Asia or Dhaka
-
+    tz_data.initializeTimeZones();
     tz.setLocalLocation(tz.getLocation('Asia/Dhaka'));
 
     const AndroidInitializationSettings androidSettings =
-        AndroidInitializationSettings('@mipmap/ic_launcher'); // use app icon
+        AndroidInitializationSettings('@mipmap/ic_launcher');
 
     const InitializationSettings settings = InitializationSettings(
       android: androidSettings,
@@ -31,16 +26,14 @@ class NotificationService {
     await _notificationsPlugin.initialize(settings);
   }
 
-  //  PERMISSION
-
+  // ================= PERMISSION =================
   Future<void> requestPermission() async {
     await Permission.notification.request();
-
-    // Exact time  alarm schedule  permission (Android 12+)
     await Permission.scheduleExactAlarm.request();
+    await Permission.systemAlertWindow.request();
   }
 
-  // SCHEDULE NOTIFICATION
+  // ================= SCHEDULE NOTIFICATION =================
   Future<void> scheduleNotification({
     required int id,
     required String title,
@@ -60,35 +53,26 @@ class NotificationService {
       android: androidDetails,
     );
 
+    // exact alarm permission na thakle alarmClock mode exception dey,
+    // tokhon inexact mode e fallback kori jate schedule fail na hoy.
+    final bool canScheduleExact = await Permission.scheduleExactAlarm.isGranted;
+
     await _notificationsPlugin.zonedSchedule(
       id,
       title,
       body,
-      tz.TZDateTime.from(
-        scheduledDateTime,
-        tz.local,
-      ), // make DateTime to timezone-aware
+      tz.TZDateTime.from(scheduledDateTime, tz.local),
       details,
-      androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
+      androidScheduleMode: canScheduleExact
+          ? AndroidScheduleMode.alarmClock
+          : AndroidScheduleMode.inexactAllowWhileIdle,
       uiLocalNotificationDateInterpretation:
           UILocalNotificationDateInterpretation.absoluteTime,
     );
   }
 
-  // CANCEL NOTIFICATION
-
+  // ================= CANCEL NOTIFICATION =================
   Future<void> cancelNotification(int id) async {
     await _notificationsPlugin.cancel(id);
-  }
-
-  // ডিবাগ - Pending Notification চেক করা
-  Future<void> printPendingNotifications() async {
-    final List<PendingNotificationRequest> pending = await _notificationsPlugin
-        .pendingNotificationRequests();
-    print("========== Pending Notifications: ${pending.length} ==========");
-    for (var n in pending) {
-      print("ID: ${n.id}, Title: ${n.title}, Body: ${n.body}");
-    }
-    print("================================================");
   }
 }

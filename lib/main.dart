@@ -5,13 +5,14 @@ import 'home_page.dart';
 import 'notification_service.dart';
 
 void main() async {
-  //Hive Setup
-  WidgetsFlutterBinding.ensureInitialized(); 
+  WidgetsFlutterBinding.ensureInitialized();
+
+  // ---------- Hive Setup ----------
   await Hive.initFlutter();
-  Hive.registerAdapter(TaskAdapter()); 
+  Hive.registerAdapter(TaskAdapter());
   await Hive.openBox<Task>('tasksBox');
 
-  //notification setup
+  // ---------- Notification Setup ----------
   await NotificationService().init();
   await NotificationService().requestPermission();
 

@@ -10,16 +10,13 @@ class AddTaskPage extends StatefulWidget {
 }
 
 class _AddTaskPageState extends State<AddTaskPage> {
-  // TextDield controller
   final TextEditingController titleController = TextEditingController();
   final TextEditingController descriptionController = TextEditingController();
 
-  //State Variavles
   DateTime? selectedDate;
-  TimeOfDay? SelectedTime;
+  TimeOfDay? selectedTime;
   bool isHighPriority = false;
 
-  //Date picker
   Future<void> pickDate() async {
     final DateTime? picked = await showDatePicker(
       context: context,
@@ -27,7 +24,6 @@ class _AddTaskPageState extends State<AddTaskPage> {
       firstDate: DateTime.now(),
       lastDate: DateTime(2100),
     );
-    //null check
     if (picked != null) {
       setState(() {
         selectedDate = picked;
@@ -35,54 +31,45 @@ class _AddTaskPageState extends State<AddTaskPage> {
     }
   }
 
-  //Time Picker
   Future<void> pickTime() async {
     final TimeOfDay? picked = await showTimePicker(
       context: context,
       initialTime: TimeOfDay.now(),
     );
-
-    //null check
     if (picked != null) {
       setState(() {
-        SelectedTime = picked;
+        selectedTime = picked;
       });
     }
   }
 
-  //Save Task
-
-  void saveTask() async {
-    //check fill TextField
+  Future<void> saveTask() async {
     if (titleController.text.isEmpty) {
       ScaffoldMessenger.of(
         context,
-      ).showSnackBar(const SnackBar(content: Text("Set Titile")));
+      ).showSnackBar(const SnackBar(content: Text("Set Title")));
       return;
     }
 
-    if (selectedDate == null || SelectedTime == null) {
+    if (selectedDate == null || selectedTime == null) {
       ScaffoldMessenger.of(
         context,
       ).showSnackBar(const SnackBar(content: Text("Set Date and Time")));
       return;
     }
 
-    //togather date and time
     final DateTime finalDateTime = DateTime(
       selectedDate!.year,
       selectedDate!.month,
       selectedDate!.day,
-      SelectedTime!.hour,
-      SelectedTime!.minute,
+      selectedTime!.hour,
+      selectedTime!.minute,
     );
 
-    //notificationId
     final int notificationId = DateTime.now().millisecondsSinceEpoch.remainder(
       100000,
     );
 
-    //New Task Object
     final Task newTask = Task(
       title: titleController.text,
       description: descriptionController.text,
@@ -91,33 +78,43 @@ class _AddTaskPageState extends State<AddTaskPage> {
       notificationId: notificationId,
     );
 
-    //notifiaction Schedule
     if (finalDateTime.isAfter(DateTime.now())) {
-      await NotificationService().scheduleNotification(
-        id: notificationId,
-        title: "Task Reminder",
-        body: newTask.title,
-        scheduledDateTime: finalDateTime,
-      );
-      await NotificationService().printPendingNotifications();
+      try {
+        await NotificationService().scheduleNotification(
+          id: notificationId,
+          title: "Task Reminder",
+          body: newTask.title,
+          scheduledDateTime: finalDateTime,
+        );
+      } catch (e) {
+        // Notification schedule fail korle o task save hobe, just reminder set hobe na.
+        debugPrint("Notification schedule failed: $e");
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text(
+                "Task saved, but reminder could not be scheduled. Check exact alarm permission in Settings.",
+              ),
+            ),
+          );
+        }
+      }
     }
 
     if (!mounted) return;
 
-    //Hive code part
     Navigator.pop(context, newTask);
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text("Add Task")),
+      appBar: AppBar(title: const Text("Add Task")),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(16),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            //Title Field
             TextField(
               controller: titleController,
               decoration: const InputDecoration(
@@ -125,22 +122,18 @@ class _AddTaskPageState extends State<AddTaskPage> {
                 border: OutlineInputBorder(),
               ),
             ),
-
             const SizedBox(height: 16),
 
-            //Description Field
             TextField(
               controller: descriptionController,
-              maxLines: 3, //Maximum 3 line write
+              maxLines: 3,
               decoration: const InputDecoration(
                 labelText: "Description",
                 border: OutlineInputBorder(),
               ),
             ),
-
             const SizedBox(height: 16),
 
-            //Date Picker Button
             ListTile(
               contentPadding: EdgeInsets.zero,
               leading: const Icon(Icons.calendar_today),
@@ -151,24 +144,20 @@ class _AddTaskPageState extends State<AddTaskPage> {
               ),
               onTap: pickDate,
             ),
-
             const SizedBox(height: 16),
 
-            //Time picker Button
             ListTile(
               contentPadding: EdgeInsets.zero,
               leading: const Icon(Icons.access_time),
               title: Text(
-                SelectedTime == null
+                selectedTime == null
                     ? "Set Time"
-                    : SelectedTime!.format(context),
+                    : selectedTime!.format(context),
               ),
               onTap: pickTime,
             ),
-
             const SizedBox(height: 16),
 
-            //Priority Toggle
             SwitchListTile(
               contentPadding: EdgeInsets.zero,
               title: const Text("High Priority"),
@@ -179,7 +168,6 @@ class _AddTaskPageState extends State<AddTaskPage> {
                 });
               },
             ),
-
             const SizedBox(height: 16),
 
             SizedBox(
