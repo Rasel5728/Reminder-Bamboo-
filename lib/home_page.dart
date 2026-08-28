@@ -12,11 +12,8 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
-  //  HIVE BOX 
-
   final Box<Task> taskBox = Hive.box<Task>('tasksBox');
 
-  //  NAVIGATION 
   Future<void> goToAddTaskPage() async {
     final Task? newTask = await Navigator.push(
       context,
@@ -30,23 +27,20 @@ class _HomePageState extends State<HomePage> {
     }
   }
 
-  //  DELETE TASK 
-
-void deleteTask(int index) {
-  final task = taskBox.getAt(index);
-  if (task != null) {
-    NotificationService().cancelNotification(task.notificationId);
+  void deleteTask(int index) {
+    final task = taskBox.getAt(index);
+    if (task != null) {
+      NotificationService().cancelNotification(task.notificationId);
+    }
+    setState(() {
+      taskBox.deleteAt(index);
+    });
   }
-  setState(() {
-    taskBox.deleteAt(index);
-  });
-}
 
-  //  TOGGLE DONE 
   void toggleDone(Task task) {
     setState(() {
       task.isDone = !task.isDone;
-      task.save(); 
+      task.save();
     });
   }
 
