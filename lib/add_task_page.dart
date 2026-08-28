@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'task_model.dart';
+import 'notification_service.dart';
 
 class AddTaskPage extends StatefulWidget {
   const AddTaskPage({super.key});
@@ -50,7 +51,8 @@ class _AddTaskPageState extends State<AddTaskPage> {
   }
 
   //Save Task
-  void saveTask() {
+
+  void saveTask() async {
     //check fill TextField
     if (titleController.text.isEmpty) {
       ScaffoldMessenger.of(
@@ -60,9 +62,9 @@ class _AddTaskPageState extends State<AddTaskPage> {
     }
 
     if (selectedDate == null || SelectedTime == null) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text("Set Date and Time")),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text("Set Date and Time")));
       return;
     }
 
@@ -75,13 +77,32 @@ class _AddTaskPageState extends State<AddTaskPage> {
       SelectedTime!.minute,
     );
 
+    //notificationId
+    final int notificationId = DateTime.now().millisecondsSinceEpoch.remainder(
+      100000,
+    );
+
     //New Task Object
     final Task newTask = Task(
       title: titleController.text,
       description: descriptionController.text,
       dateTime: finalDateTime,
       isHighPriority: isHighPriority,
+      notificationId: notificationId,
     );
+
+    //notifiaction Schedule
+    if (finalDateTime.isAfter(DateTime.now())) {
+      await NotificationService().scheduleNotification(
+        id: notificationId,
+        title: "Task Reminder",
+        body: newTask.title,
+        scheduledDateTime: finalDateTime,
+      );
+      await NotificationService().printPendingNotifications();
+    }
+
+    if (!mounted) return;
 
     //Hive code part
     Navigator.pop(context, newTask);
@@ -124,9 +145,11 @@ class _AddTaskPageState extends State<AddTaskPage> {
               contentPadding: EdgeInsets.zero,
               leading: const Icon(Icons.calendar_today),
               title: Text(
-                selectedDate==null? "Set Date" : "${selectedDate!.day}/${selectedDate!.month}/${selectedDate!.year}",
+                selectedDate == null
+                    ? "Set Date"
+                    : "${selectedDate!.day}/${selectedDate!.month}/${selectedDate!.year}",
               ),
-              onTap: pickDate,            
+              onTap: pickDate,
             ),
 
             const SizedBox(height: 16),

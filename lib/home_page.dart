@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'task_model.dart';
 import 'add_task_page.dart';
+import 'notification_service.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -30,11 +31,16 @@ class _HomePageState extends State<HomePage> {
   }
 
   //  DELETE TASK 
-  void deleteTask(int index) {
-    setState(() {
-      taskBox.deleteAt(index);
-    });
+
+void deleteTask(int index) {
+  final task = taskBox.getAt(index);
+  if (task != null) {
+    NotificationService().cancelNotification(task.notificationId);
   }
+  setState(() {
+    taskBox.deleteAt(index);
+  });
+}
 
   //  TOGGLE DONE 
   void toggleDone(Task task) {
