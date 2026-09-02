@@ -99,6 +99,10 @@ class MyApp extends StatelessWidget {
           backgroundColor: Color(0xFF162033),
           contentTextStyle: TextStyle(color: Colors.white, fontSize: 14),
           behavior: SnackBarBehavior.floating,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.all(Radius.circular(16),),
+          ),
+
           elevation: 6,
         ),
       ),

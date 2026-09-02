@@ -82,7 +82,7 @@ class _AddTaskPageState extends State<AddTaskPage> {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content:
-              Text("Reminder in ${_formatDuration(diff)}"),
+              Text("Reminder in ${_formatDuration(diff)}",textAlign: TextAlign.center,),
           duration: const Duration(seconds: 2),
         ),
       );
