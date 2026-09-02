@@ -46,12 +46,12 @@ class _AddTaskPageState extends State<AddTaskPage> {
   Future<void> saveTask() async {
     if (titleController.text.isEmpty) {
       ScaffoldMessenger.of(context)
-          .showSnackBar(const SnackBar(content: Text("Set Title")));
+          .showSnackBar(const SnackBar(content: Text("Set Title",textAlign: TextAlign.center),duration: Duration(seconds: 1)));
       return;
     }
     if (selectedDate == null || selectedTime == null) {
       ScaffoldMessenger.of(context)
-          .showSnackBar(const SnackBar(content: Text("Set Date and Time")));
+          .showSnackBar(const SnackBar(content: Text("Set Date and Time",textAlign: TextAlign.center),duration: Duration(seconds: 1)));
       return;
     }
 
