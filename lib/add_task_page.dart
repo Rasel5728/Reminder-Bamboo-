@@ -45,13 +45,21 @@ class _AddTaskPageState extends State<AddTaskPage> {
 
   Future<void> saveTask() async {
     if (titleController.text.isEmpty) {
-      ScaffoldMessenger.of(context)
-          .showSnackBar(const SnackBar(content: Text("Set Title",textAlign: TextAlign.center),duration: Duration(seconds: 1)));
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text("Set Title", textAlign: TextAlign.center),
+          duration: Duration(seconds: 1),
+        ),
+      );
       return;
     }
     if (selectedDate == null || selectedTime == null) {
-      ScaffoldMessenger.of(context)
-          .showSnackBar(const SnackBar(content: Text("Set Date and Time",textAlign: TextAlign.center),duration: Duration(seconds: 1)));
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text("Set Date and Time", textAlign: TextAlign.center),
+          duration: Duration(seconds: 1),
+        ),
+      );
       return;
     }
 
@@ -63,8 +71,9 @@ class _AddTaskPageState extends State<AddTaskPage> {
       selectedTime!.minute,
     );
 
-    final int notificationId =
-        DateTime.now().millisecondsSinceEpoch.remainder(100000);
+    final int notificationId = DateTime.now().millisecondsSinceEpoch.remainder(
+      100000,
+    );
 
     final Task newTask = Task(
       title: titleController.text,
@@ -74,15 +83,16 @@ class _AddTaskPageState extends State<AddTaskPage> {
       notificationId: notificationId,
     );
 
-
     final bool willRemind = finalDateTime.isAfter(DateTime.now());
 
     if (willRemind) {
       final Duration diff = finalDateTime.difference(DateTime.now());
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content:
-              Text("Reminder in ${_formatDuration(diff)}",textAlign: TextAlign.center,),
+          content: Text(
+            "Reminder in ${_formatDuration(diff)}",
+            textAlign: TextAlign.center,
+          ),
           duration: const Duration(seconds: 2),
         ),
       );
@@ -107,15 +117,25 @@ class _AddTaskPageState extends State<AddTaskPage> {
   }
 
   String _formatDuration(Duration d) {
-    final hours = d.inHours;
+    final days = d.inDays;
+    final hours = d.inHours % 24;
     final minutes = d.inMinutes % 60;
-    if (hours > 0 && minutes > 0) {
-      return "$hours hours $minutes minutes";
-    } else if (hours > 0) {
-      return "$hours hours";
-    } else {
-      return "$minutes minutes";
-    }
+
+    final List<String> parts = [];
+    if (days > 0) parts.add("$days days");
+    if (hours > 0) parts.add("$hours hours");
+    if (minutes > 0) parts.add("$minutes minutes");
+
+    if (parts.isEmpty) return "$minutes minutes";
+    return parts.join(" ");
+
+    // if (hours > 0 && minutes > 0) {
+    //   return "$hours hours $minutes minutes";
+    // } else if (hours > 0) {
+    //   return "$hours hours";
+    // } else {
+    //   return "$minutes minutes";
+    // }
   }
 
   @override
