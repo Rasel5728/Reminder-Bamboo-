@@ -100,21 +100,10 @@ class MyApp extends StatelessWidget {
           contentTextStyle: TextStyle(color: Colors.white, fontSize: 14),
           behavior: SnackBarBehavior.floating,
           elevation: 6,
-          
         ),
       ),
 
       themeMode: ThemeMode.dark,
-      // darkTheme: ThemeData(
-      //   brightness: .dark,
-      //   useMaterial3: true,
-      //   colorSchemeSeed: Colors.green,
-      // ),
-      //themeMode: ThemeMode.dark,
-
-      // //theme: ThemeData.light(),
-      // darkTheme: ThemeData.dark(),
-      // themeMode: ThemeMode.dark,
       home: const HomePage(),
     );
   }

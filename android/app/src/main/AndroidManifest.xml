@@ -5,7 +5,7 @@
     <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED"/>
     <uses-permission android:name="android.permission.WAKE_LOCK"/>
     <application
-        android:label="Bamboo"
+        android:label="TaskBell"
         android:name="${applicationName}"
         android:icon="@mipmap/launcher_icon">
         <activity
