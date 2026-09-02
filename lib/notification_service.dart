@@ -71,7 +71,7 @@ Future<void> handleNotificationAction(NotificationResponse response) async {
     try {
       await NotificationService().scheduleNotification(
         id: task.notificationId,
-        title: "Task Reminder",
+        title: "TaskBell", //Add app name on notificationbar
         body: task.title,
         scheduledDateTime: newTime,
         payload: notifId.toString(),

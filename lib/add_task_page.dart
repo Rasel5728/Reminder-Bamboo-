@@ -100,7 +100,7 @@ class _AddTaskPageState extends State<AddTaskPage> {
       try {
         await NotificationService().scheduleNotification(
           id: notificationId,
-          title: "Task Reminder",
+          title: "TaskBell", //Add app name on notificationbar
           body: newTask.title,
           scheduledDateTime: finalDateTime,
           payload: notificationId.toString(),
