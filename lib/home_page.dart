@@ -23,8 +23,7 @@ class _HomePageState extends State<HomePage> {
 
     if (newTask != null) {
       setState(() {
-        // notificationId ke Hive key banalam, jate notification theke
-        // taskBox.get(notificationId) diye task khuje pawa jay
+
         taskBox.put(newTask.notificationId, newTask);
       });
     }
@@ -98,7 +97,7 @@ class _HomePageState extends State<HomePage> {
                         context: context,
                         builder: (ctx) => AlertDialog(
                           title: const Text("Delete Task?"),
-                          content: Text("\"${task.title}\" delete korte chao?"),
+                          content: Text("Do you want to delete \"${task.title}\"?"),
                           actions: [
                             TextButton(
                               onPressed: () => Navigator.pop(ctx, false),

@@ -110,11 +110,11 @@ class _AddTaskPageState extends State<AddTaskPage> {
     final hours = d.inHours;
     final minutes = d.inMinutes % 60;
     if (hours > 0 && minutes > 0) {
-      return "$hours ghonta $minutes minit";
+      return "$hours hours $minutes minutes";
     } else if (hours > 0) {
-      return "$hours ghonta";
+      return "$hours hours";
     } else {
-      return "$minutes minit";
+      return "$minutes minutes";
     }
   }
 
