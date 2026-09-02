@@ -59,7 +59,9 @@ Future<void> handleNotificationAction(NotificationResponse response) async {
     await task.save();
     await taskBox.flush();
     await NotificationService().cancelNotification(task.notificationId);
-    debugPrint("Task complete kora holo: ${task.title}, isDone: ${task.isDone}");
+    debugPrint(
+      "Task complete kora holo: ${task.title}, isDone: ${task.isDone}",
+    );
   } else if (response.actionId == snoozeActionId) {
     if (!Hive.isBoxOpen(SettingsService.boxName)) {
       await Hive.openBox(SettingsService.boxName);
@@ -132,7 +134,7 @@ class NotificationService {
           actions: const <AndroidNotificationAction>[
             AndroidNotificationAction(
               completeActionId,
-              'complete',
+              'Complete',
               showsUserInterface: false,
               cancelNotification: true,
             ),
