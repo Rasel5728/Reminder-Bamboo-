@@ -3,6 +3,7 @@ import 'package:hive_flutter/hive_flutter.dart';
 import 'task_model.dart';
 import 'add_task_page.dart';
 import 'notification_service.dart';
+import 'settings_page.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -22,18 +23,17 @@ class _HomePageState extends State<HomePage> {
 
     if (newTask != null) {
       setState(() {
-        taskBox.add(newTask);
+        // notificationId ke Hive key banalam, jate notification theke
+        // taskBox.get(notificationId) diye task khuje pawa jay
+        taskBox.put(newTask.notificationId, newTask);
       });
     }
   }
 
-  void deleteTask(int index) {
-    final task = taskBox.getAt(index);
-    if (task != null) {
-      NotificationService().cancelNotification(task.notificationId);
-    }
+  void deleteTask(Task task) {
+    NotificationService().cancelNotification(task.notificationId);
     setState(() {
-      taskBox.deleteAt(index);
+      task.delete(); // HiveObject er built-in method
     });
   }
 
@@ -47,8 +47,20 @@ class _HomePageState extends State<HomePage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text("Tasks")),
-
+      appBar: AppBar(
+        title: const Text("Tasks"),
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.settings),
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => const SettingsPage()),
+              );
+            },
+          ),
+        ],
+      ),
       body: ValueListenableBuilder(
         valueListenable: taskBox.listenable(),
         builder: (context, Box<Task> box, _) {
@@ -68,41 +80,65 @@ class _HomePageState extends State<HomePage> {
             itemBuilder: (context, index) {
               final task = box.getAt(index)!;
 
-              return Card(
-                margin: const EdgeInsets.symmetric(vertical: 6),
-                child: ListTile(
-                  leading: Checkbox(
-                    value: task.isDone,
-                    onChanged: (value) => toggleDone(task),
+              return Dismissible(
+                key: ValueKey(task.key),
+                direction: DismissDirection.endToStart,
+                background: Container(
+                  alignment: Alignment.centerRight,
+                  padding: const EdgeInsets.symmetric(horizontal: 20),
+                  margin: const EdgeInsets.symmetric(vertical: 6),
+                  decoration: BoxDecoration(
+                    color: Colors.red,
+                    borderRadius: BorderRadius.circular(8),
                   ),
-                  title: Text(
-                    task.title,
-                    style: TextStyle(
-                      decoration: task.isDone
-                          ? TextDecoration.lineThrough
-                          : TextDecoration.none,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                  subtitle: Text(
-                    "${task.description}\n"
-                    "${task.dateTime.day}/${task.dateTime.month}/${task.dateTime.year} "
-                    "${TimeOfDay.fromDateTime(task.dateTime).format(context)}",
-                  ),
-                  isThreeLine: true,
-                  trailing: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      if (task.isHighPriority)
-                        const Padding(
-                          padding: EdgeInsets.only(right: 8),
-                          child: Icon(Icons.priority_high, color: Colors.red),
+                  child: const Icon(Icons.delete, color: Colors.white),
+                ),
+                confirmDismiss: (direction) async {
+                  return await showDialog<bool>(
+                        context: context,
+                        builder: (ctx) => AlertDialog(
+                          title: const Text("Delete Task?"),
+                          content: Text("\"${task.title}\" delete korte chao?"),
+                          actions: [
+                            TextButton(
+                              onPressed: () => Navigator.pop(ctx, false),
+                              child: const Text("Cancel"),
+                            ),
+                            TextButton(
+                              onPressed: () => Navigator.pop(ctx, true),
+                              child: const Text("Delete"),
+                            ),
+                          ],
                         ),
-                      IconButton(
-                        icon: const Icon(Icons.delete_outline),
-                        onPressed: () => deleteTask(index),
+                      ) ??
+                      false;
+                },
+                onDismissed: (direction) => deleteTask(task),
+                child: Card(
+                  margin: const EdgeInsets.symmetric(vertical: 6),
+                  child: ListTile(
+                    leading: Checkbox(
+                      value: task.isDone,
+                      onChanged: (value) => toggleDone(task),
+                    ),
+                    title: Text(
+                      task.title,
+                      style: TextStyle(
+                        decoration: task.isDone
+                            ? TextDecoration.lineThrough
+                            : TextDecoration.none,
+                        fontWeight: FontWeight.bold,
                       ),
-                    ],
+                    ),
+                    subtitle: Text(
+                      "${task.description}\n"
+                      "${task.dateTime.day}/${task.dateTime.month}/${task.dateTime.year} "
+                      "${TimeOfDay.fromDateTime(task.dateTime).format(context)}",
+                    ),
+                    isThreeLine: true,
+                    trailing: task.isHighPriority
+                        ? const Icon(Icons.priority_high, color: Colors.red)
+                        : null,
                   ),
                 ),
               );
@@ -110,7 +146,6 @@ class _HomePageState extends State<HomePage> {
           );
         },
       ),
-
       floatingActionButton: FloatingActionButton(
         onPressed: goToAddTaskPage,
         child: const Icon(Icons.add),

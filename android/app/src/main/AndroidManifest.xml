@@ -31,6 +31,9 @@
             </intent-filter>
         </activity>
 
+        <!-- flutter_local_notifications: notification action button (Complete / Remind Later) handle korar jonno -->
+        <receiver android:exported="false" android:name="com.dexterous.flutterlocalnotifications.ActionBroadcastReceiver" />
+
         <!-- flutter_local_notifications: scheduled notification receiver -->
         <receiver android:exported="false" android:name="com.dexterous.flutterlocalnotifications.ScheduledNotificationReceiver" />
 

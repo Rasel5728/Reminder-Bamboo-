@@ -9,13 +9,11 @@ class SettingsPage extends StatefulWidget {
 }
 
 class _SettingsPageState extends State<SettingsPage> {
-  late bool alarmEnabled;
   late int snoozeMinutes;
 
   @override
   void initState() {
     super.initState();
-    alarmEnabled = SettingsService.isAlarmEnabled;
     snoozeMinutes = SettingsService.snoozeMinutes;
   }
 
@@ -26,16 +24,6 @@ class _SettingsPageState extends State<SettingsPage> {
       body: ListView(
         padding: const EdgeInsets.all(16),
         children: [
-          SwitchListTile(
-            title: const Text("Alarm Enable"),
-            value: alarmEnabled,
-            onChanged: (value) async {
-              await SettingsService.setAlarmEnabled(value);
-              setState(() => alarmEnabled = value);
-            },
-          ),
-          const Divider(),
-
           ListTile(
             title: const Text("Remind Me Later"),
             subtitle: Text("After $snoozeMinutes Minutes"),
