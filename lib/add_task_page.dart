@@ -45,16 +45,13 @@ class _AddTaskPageState extends State<AddTaskPage> {
 
   Future<void> saveTask() async {
     if (titleController.text.isEmpty) {
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(const SnackBar(content: Text("Set Title")));
+      ScaffoldMessenger.of(context)
+          .showSnackBar(const SnackBar(content: Text("Set Title")));
       return;
     }
-
     if (selectedDate == null || selectedTime == null) {
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(const SnackBar(content: Text("Set Date and Time")));
+      ScaffoldMessenger.of(context)
+          .showSnackBar(const SnackBar(content: Text("Set Date and Time")));
       return;
     }
 
@@ -66,9 +63,8 @@ class _AddTaskPageState extends State<AddTaskPage> {
       selectedTime!.minute,
     );
 
-    final int notificationId = DateTime.now().millisecondsSinceEpoch.remainder(
-      100000,
-    );
+    final int notificationId =
+        DateTime.now().millisecondsSinceEpoch.remainder(100000);
 
     final Task newTask = Task(
       title: titleController.text,
@@ -78,32 +74,48 @@ class _AddTaskPageState extends State<AddTaskPage> {
       notificationId: notificationId,
     );
 
-    if (finalDateTime.isAfter(DateTime.now())) {
+
+    final bool willRemind = finalDateTime.isAfter(DateTime.now());
+
+    if (willRemind) {
+      final Duration diff = finalDateTime.difference(DateTime.now());
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content:
+              Text("Reminder in ${_formatDuration(diff)}"),
+          duration: const Duration(seconds: 2),
+        ),
+      );
+
       try {
         await NotificationService().scheduleNotification(
           id: notificationId,
           title: "Task Reminder",
           body: newTask.title,
           scheduledDateTime: finalDateTime,
+          payload: notificationId.toString(),
         );
       } catch (e) {
-        // Notification schedule fail korle o task save hobe, just reminder set hobe na.
         debugPrint("Notification schedule failed: $e");
-        if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(
-              content: Text(
-                "Task saved, but reminder could not be scheduled. Check exact alarm permission in Settings.",
-              ),
-            ),
-          );
-        }
       }
+
+      await Future.delayed(const Duration(milliseconds: 900));
     }
 
     if (!mounted) return;
-
     Navigator.pop(context, newTask);
+  }
+
+  String _formatDuration(Duration d) {
+    final hours = d.inHours;
+    final minutes = d.inMinutes % 60;
+    if (hours > 0 && minutes > 0) {
+      return "$hours hours $minutes minutes";
+    } else if (hours > 0) {
+      return "$hours hours";
+    } else {
+      return "$minutes minutes";
+    }
   }
 
   @override
