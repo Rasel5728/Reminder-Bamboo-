@@ -104,7 +104,7 @@ class NotificationService {
           importance: Importance.max,
           priority: Priority.high,
           playSound: true,
-          sound: const RawResourceAndroidNotificationSound('notifcation_sound'),
+
           actions: const <AndroidNotificationAction>[
             AndroidNotificationAction(
               completeActionId,
